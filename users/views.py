@@ -2,23 +2,24 @@ from smsaero import SmsAero
 from rest_framework import generics, status
 from config.settings import SMSAERO_EMAIL, SMSAERO_API_KEY
 from users.models import User
-from users.serializers import UserSerializers, UserСheckSerializers
-from rest_framework.permissions import AllowAny
+from users.serializers import UserCreateSerializers, UserСheckSerializers, ProfileSerializers
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 import random
 import time
 from users.services import generate_invite_code
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class UserCreateAPIView(generics.CreateAPIView):
-    serializer_class = UserSerializers
+    serializer_class = UserCreateSerializers
     queryset = User.objects.all()
     permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
         user = serializer.save(is_active=True)
-        user.set_password(user.password)
+        user.set_unusable_password()
         user.save()
 
     def create(self, request, *args, **kwargs):
@@ -37,9 +38,10 @@ class UserCreateAPIView(generics.CreateAPIView):
         user.save()
 
         try:
-            sms = SmsAero(email=SMSAERO_EMAIL, api_key=SMSAERO_API_KEY)
-            time.sleep(3)
-            sms.send_sms(phone_number_int,f'Ваш код подтверждения: {authorization_code}')
+            print(authorization_code)
+            # sms = SmsAero(email=SMSAERO_EMAIL, api_key=SMSAERO_API_KEY)
+            # time.sleep(3)
+            # sms.send_sms(phone_number_int,f'Ваш код подтверждения: {authorization_code}')
 
         except Exception as e:
             return Response(
@@ -84,32 +86,73 @@ class UserСheckAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        user.invite_code = generate_invite_code()
+        if 'invite_code' in request.data:
+            user.invite_code = request.data['invite_code']
+        elif not user.invite_code:
+            user.invite_code = generate_invite_code()
         user.save()
+
+        refresh = RefreshToken.for_user(user)
 
         return Response(
             {
                 "detail": f"Успешная авторизация номера {user.phone_number}",
+                "tokens": {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                },
             },
             status=status.HTTP_200_OK
         )
 
 
-class UserUpdateAPIView(generics.UpdateAPIView):
-    serializer_class = UserSerializers
+class ProfileAPIView(APIView):
+    serializer_class = ProfileSerializers
     queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        user = request.user
+        serializer = self.serializer_class(user)
 
-class UserDestroyAPIView(generics.DestroyAPIView):
-    serializer_class = UserSerializers
-    queryset = User.objects.all()
+        related_users = User.objects.filter(vicarious_invite_code=user.invite_code)
+        related_phones = [user.phone_number for user in related_users]
+        response_data = serializer.data
+        response_data['related_users'] = related_phones
+        return Response(response_data)
 
+    def post(self, request):
+        user = request.user
+        vicarious_invite_code = request.data.get('vicarious_invite_code')
 
-class UserListAPIView(generics.ListAPIView):
-    serializer_class = UserSerializers
-    queryset = User.objects.all()
+        if not vicarious_invite_code:
+            return Response(
+                {"detail": "Необходимо указать инвайт-код"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        if user.vicarious_invite_code:
+            return Response(
+                {"detail": "Вы уже активировали инвайт-код"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-class UserRetrieveAPIView(generics.RetrieveAPIView):
-    serializer_class = UserSerializers
-    queryset = User.objects.all()
+        if not User.objects.filter(invite_code=vicarious_invite_code).exists():
+            return Response(
+                {"detail": "Указанный инвайт-код не существует"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if vicarious_invite_code == user.invite_code:
+            return Response(
+                {"detail": "Нельзя использовать собственный инвайт-код"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.vicarious_invite_code = vicarious_invite_code
+        user.save()
+
+        return Response(
+            {"detail": "Инвайт-код успешно активирован"},
+            status=status.HTTP_200_OK
+        )

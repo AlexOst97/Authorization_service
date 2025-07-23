@@ -4,6 +4,11 @@ from django.db import models
 
 class User(AbstractUser):
     username = None
+    password = models.CharField(max_length=128,
+                                blank=True,
+                                null=True,
+                                verbose_name="Пароль")
+
     email = models.EmailField(unique=True,
                               blank=True,
                               null=True,
