@@ -104,3 +104,6 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),  # JWT-токенов
 }
+
+SMSAERO_EMAIL = os.getenv("SMSAERO_EMAIL")
+SMSAERO_API_KEY = os.getenv("SMSAERO_API_KEY")

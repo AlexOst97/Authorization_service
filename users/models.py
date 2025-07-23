@@ -36,6 +36,21 @@ class User(AbstractUser):
     is_active = models.BooleanField(default=True,
                                     verbose_name="Активный пользователь")
 
+    authorization_code = models.CharField(max_length=4,
+                                   blank=True,
+                                   null=True,
+                                   verbose_name="Код авторизации")
+
+    invite_code = models.CharField(max_length=6,
+                                   blank=True,
+                                   null=True,
+                                   verbose_name="Инвайт-код")
+
+    vicarious_invite_code = models.CharField(max_length=6,
+                                   blank=True,
+                                   null=True,
+                                   verbose_name="Чужой инвайт-код")
+
     USERNAME_FIELD = "phone_number"
     REQUIRED_FIELDS = []
 
