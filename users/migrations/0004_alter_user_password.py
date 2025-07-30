@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0003_remove_user_correct_invite_code_and_more'),
+        ("users", "0003_remove_user_correct_invite_code_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='password',
-            field=models.CharField(blank=True, max_length=128, null=True, verbose_name='Пароль'),
+            model_name="user",
+            name="password",
+            field=models.CharField(
+                blank=True, max_length=128, null=True, verbose_name="Пароль"
+            ),
         ),
     ]

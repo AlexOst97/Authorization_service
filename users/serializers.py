@@ -21,8 +21,11 @@ class ProfileSerializers(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = "__all__"
-        read_only_fields = ("is_active", "authorization_code",)
+        read_only_fields = (
+            "is_active",
+            "authorization_code",
+        )
         extra_kwargs = {
-            "phone_number": {'read_only': True},
-            "invite_code": {'read_only': True},
+            "phone_number": {"read_only": True},
+            "invite_code": {"read_only": True},
         }

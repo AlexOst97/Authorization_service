@@ -20,12 +20,11 @@
               <div class="d-flex justify-content-between align-items-center">
                 <div class="btn-group">
                   <a class="btn btn-sm btn-outline-secondary" href="{% url 'interface:user-update' user.pk %}" role="button">Изменить</a>
-                </div>
-              </div>
+
                 <li class="d-flex justify-content-between align-items-center">
                 <form method="post" action="{% url 'interface:logout' %}">
                 {% csrf_token %}
-                <button type="submit" class="nav-link"> Выйти </button>
+                <button type="submit" class="btn btn-sm btn-outline-secondary"> Выйти </button>
                 </form>
                 </li>
             </div>
@@ -42,11 +41,11 @@
         <div class="col">
           <div class="card shadow-sm">
             <div class="card-body">
-            {% if related_users %}
             <div class="card mt-3">
                 <div class="card-body">
                     <h5 class="card-title">Пользователи, которые использовали ваш код:</h5>
                     <ul>
+                        {% if related_users %}
                         {% for user in related_users %}
                             <li>{{ user.phone_number }} - {{user.last_name }} {{ user.first_name }}</li>
                         {% endfor %}

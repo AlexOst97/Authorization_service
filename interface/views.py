@@ -1,42 +1,34 @@
-from django.urls import reverse_lazy, reverse
-from django.views.generic import View, DetailView, UpdateView, DeleteView
-from smsaero import SmsAero
-from rest_framework import generics, status
-from config.settings import SMSAERO_EMAIL, SMSAERO_API_KEY
-from users.models import User
-from interface.forms import UserCreateForm, UserСheckForm, ProfileForm
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
-import random
 import time
+from django.urls import reverse_lazy, reverse
+from django.views.generic import View, DetailView, UpdateView
+from smsaero import SmsAero
+from config.settings import SMSAERO_EMAIL, SMSAERO_API_KEY
+from interface.forms import UserCreateForm, UserСheckForm, ProfileForm
+import random
 from users.services import generate_invite_code
-from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from users.models import User
 from django.contrib.auth import login
 
 
-
 class UserCreateView(View):
     model = User
     form_class = UserCreateForm
-    template_name = 'user_create.html'
+    template_name = "user_create.html"
     success_url = reverse_lazy("interface:check")
 
     def get(self, request):
         return render(request, self.template_name)
 
     def post(self, request):
-        phone_number = request.POST.get('phone_number')
+        phone_number = request.POST.get("phone_number")
         if not phone_number:
             messages.error(request, "Необходимо указать номер телефона")
             return render(request, self.template_name)
 
         user, created = User.objects.get_or_create(
-            phone_number=phone_number,
-            defaults={'is_active': True}
+            phone_number=phone_number, defaults={"is_active": True}
         )
 
         authorization_code = str(random.randint(1000, 9999))
@@ -44,10 +36,13 @@ class UserCreateView(View):
         user.save()
 
         try:
-            print(f"Код подтверждения: {authorization_code}")  # Для тестирования
-            # sms = SmsAero(email=SMSAERO_EMAIL, api_key=SMSAERO_API_KEY)
-            # sms.send_sms(int(phone_number), f'Ваш код подтверждения: {authorization_code}')
-            messages.success(request, f"Код подтверждения отправлен на номер {phone_number}")
+            # print(f"Код подтверждения: {authorization_code}")
+            sms = SmsAero(email=SMSAERO_EMAIL, api_key=SMSAERO_API_KEY)
+            time.sleep(3)
+            sms.send_sms(int(phone_number), f'Ваш код подтверждения: {authorization_code}')
+            messages.success(
+                request, f"Код подтверждения отправлен на номер {phone_number}"
+            )
         except Exception as e:
             messages.error(request, f"Не удалось отправить SMS: {str(e)}")
 
@@ -57,19 +52,21 @@ class UserCreateView(View):
 class UserСheckView(View):
     model = User
     form_class = UserСheckForm
-    template_name = 'user_check.html'
+    template_name = "user_check.html"
     success_url = reverse_lazy("interface:profile")
 
     def get(self, request):
         return render(request, self.template_name)
 
     def post(self, request):
-        phone_number = request.POST.get('phone_number')
-        authorization_code = request.POST.get('authorization_code')
-        invite_code = request.POST.get('invite_code')
+        phone_number = request.POST.get("phone_number")
+        authorization_code = request.POST.get("authorization_code")
+        invite_code = request.POST.get("invite_code")
 
         if not phone_number or not authorization_code:
-            messages.error(request, "Необходимо указать номер телефона и код подтверждения")
+            messages.error(
+                request, "Необходимо указать номер телефона и код подтверждения"
+            )
             return render(request, self.template_name)
         try:
             user = User.objects.get(phone_number=phone_number)
@@ -96,10 +93,10 @@ class UserСheckView(View):
 class ProfileView(View):
     model = User
     form_class = ProfileForm
-    template_name = 'profile.html'
+    template_name = "profile.html"
 
     def get_success_url(self):
-        return reverse("interface:user-detail", kwargs={'pk': self.request.user.pk})
+        return reverse("interface:user-detail", kwargs={"pk": self.request.user.pk})
 
     def get(self, request):
         user = request.user
@@ -107,9 +104,9 @@ class ProfileView(View):
 
     def post(self, request):
         user = request.user
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        vicarious_invite_code = request.POST.get('vicarious_invite_code')
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        vicarious_invite_code = request.POST.get("vicarious_invite_code")
 
         if not vicarious_invite_code:
             messages.error(request, "Необходимо указать инвайт-код")
@@ -147,12 +144,14 @@ class UserDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         current_user = request.user
         user = self.get_object()
-        related_users = User.objects.filter(vicarious_invite_code=current_user.invite_code).exclude(id=current_user.id)
+        related_users = User.objects.filter(
+            vicarious_invite_code=current_user.invite_code
+        ).exclude(id=current_user.id)
 
         context = {
-            'user': user,
-            'current_user': current_user,
-            'related_users': related_users
+            "user": user,
+            "current_user": current_user,
+            "related_users": related_users,
         }
         return render(request, self.template_name, context)
 
@@ -163,17 +162,17 @@ class UserUpdateView(UpdateView):
     template_name = "user_update.html"
 
     def get_success_url(self):
-        return reverse("interface:user-detail", kwargs={'pk': self.request.user.pk})
+        return reverse("interface:user-detail", kwargs={"pk": self.request.user.pk})
 
     def post(self, request, *args, **kwargs):
 
         user = request.user
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        city = request.POST.get('city')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        avatar = request.POST.get('avatar')
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        city = request.POST.get("city")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        avatar = request.POST.get("avatar")
 
         user.first_name = first_name
         user.last_name = last_name

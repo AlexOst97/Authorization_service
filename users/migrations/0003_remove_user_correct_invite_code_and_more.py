@@ -6,22 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0002_user_correct_invite_code_user_invite_code'),
+        ("users", "0002_user_correct_invite_code_user_invite_code"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='correct_invite_code',
+            model_name="user",
+            name="correct_invite_code",
         ),
         migrations.AddField(
-            model_name='user',
-            name='authorization_code',
-            field=models.CharField(blank=True, max_length=4, null=True, verbose_name='Код авторизации'),
+            model_name="user",
+            name="authorization_code",
+            field=models.CharField(
+                blank=True, max_length=4, null=True, verbose_name="Код авторизации"
+            ),
         ),
         migrations.AddField(
-            model_name='user',
-            name='vicarious_invite_code',
-            field=models.CharField(blank=True, max_length=6, null=True, verbose_name='Чужой инвайт-код'),
+            model_name="user",
+            name="vicarious_invite_code",
+            field=models.CharField(
+                blank=True, max_length=6, null=True, verbose_name="Чужой инвайт-код"
+            ),
         ),
     ]
