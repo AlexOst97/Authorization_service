@@ -4,37 +4,49 @@ from django.db import models
 
 class User(AbstractUser):
     username = None
-    email = models.EmailField(unique=True,
-                              blank=True,
-                              null=True,
-                              verbose_name="Электронная почта")
+    password = models.CharField(
+        max_length=128, blank=True, null=True, verbose_name="Пароль"
+    )
 
-    first_name = models.CharField(blank=True,
-                                  null=True,
-                                  max_length=50,
-                                  verbose_name="Имя")
+    email = models.EmailField(
+        unique=True,
+        blank=True,
+        null=True,
+        default=None,
+        verbose_name="Электронная почта",
+    )
 
-    last_name = models.CharField(blank=True,
-                                 null=True,
-                                 max_length=50,
-                                 verbose_name="Фамилия")
+    first_name = models.CharField(
+        blank=True, null=True, max_length=50, verbose_name="Имя"
+    )
 
-    phone_number = models.CharField(max_length=15,
-                                    unique=True,
-                                    verbose_name="Номер телефона")
+    last_name = models.CharField(
+        blank=True, null=True, max_length=50, verbose_name="Фамилия"
+    )
 
-    city = models.CharField(max_length=50,
-                            blank=True,
-                            null=True,
-                            verbose_name="Город")
+    phone_number = models.CharField(
+        max_length=15, unique=True, verbose_name="Номер телефона"
+    )
 
-    avatar = models.ImageField(upload_to="users/image",
-                               blank=True,
-                               null=True,
-                               verbose_name="Изображение")
+    city = models.CharField(max_length=50, blank=True, null=True, verbose_name="Город")
 
-    is_active = models.BooleanField(default=True,
-                                    verbose_name="Активный пользователь")
+    avatar = models.ImageField(
+        upload_to="users/image", blank=True, null=True, verbose_name="Изображение"
+    )
+
+    is_active = models.BooleanField(default=True, verbose_name="Активный пользователь")
+
+    authorization_code = models.CharField(
+        max_length=4, blank=True, null=True, verbose_name="Код авторизации"
+    )
+
+    invite_code = models.CharField(
+        max_length=6, blank=True, null=True, verbose_name="Инвайт-код"
+    )
+
+    vicarious_invite_code = models.CharField(
+        max_length=6, blank=True, null=True, verbose_name="Чужой инвайт-код"
+    )
 
     USERNAME_FIELD = "phone_number"
     REQUIRED_FIELDS = []

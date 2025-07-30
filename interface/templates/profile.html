@@ -1,0 +1,39 @@
+{% extends 'user_base.html' %}
+{% block content %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="form-group">
+        <label for="last_name">Фамилия:</label>
+        <input type="text" class="form-control" id="last_name" name="last_name">
+    </div>
+
+    <div class="form-group">
+        <label for="first_name">Имя:</label>
+        <input type="text" class="form-control" id="first_name" name="first_name">
+    </div>
+
+    <div class="form-group">
+        <label for="phone_number">Номер телефона:</label>
+        <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ user.phone_number }}" readonly>
+    </div>
+
+    <div class="form-group">
+        <label for="authorization_code">Код авторизации:</label>
+        <input type="text" class="form-control" id="authorization_code" name="authorization_code" value="{{ user.authorization_code }}" readonly>
+    </div>
+
+    <div class="form-group">
+        <label for="vicarious_invite_code">Чужой инвайт-код:</label>
+        <input type="text" class="form-control" id="vicarious_invite_code" name="vicarious_invite_code">
+    </div>
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <div class="btn-group">
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'interface:user-detail' user.pk %}" role="button">Далее</a>
+    </div>
+    <div class="btn-group">
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'interface:check' %}" role="button">Назад</a>
+    </div>
+</form>
+{% endblock %}

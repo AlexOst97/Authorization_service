@@ -1,22 +1,22 @@
-from rest_framework import serializers
-from .models import User
+from users.models import User
+from django import forms
 
 
-class UserCreateSerializers(serializers.ModelSerializer):
+class UserCreateForm(forms.ModelForm):
 
     class Meta:
         model = User
         fields = ("phone_number",)
 
 
-class UserСheckSerializers(serializers.ModelSerializer):
+class UserСheckForm(forms.ModelForm):
 
     class Meta:
         model = User
         fields = ("phone_number", "authorization_code")
 
 
-class ProfileSerializers(serializers.ModelSerializer):
+class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = User

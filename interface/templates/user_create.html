@@ -1,0 +1,21 @@
+{% extends 'user_base.html' %}
+{% block content %}
+
+
+<div class="center-container">
+    <form method="post" class="centered-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="phone_number">Номер телефона:</label>
+            <input type="text" class="form-control" id="phone_number" name="phone_number" required>
+            <button type="submit" class="btn btn-primary full-width-button">
+                Зарегистрироваться
+            </button>
+            <div class="btn-group">
+                  <a class="btn btn-primary" href="{% url 'interface:check' %}" role="button">Войти</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'user_base.html' %}
+{% block content %}
+
+
+<div class="album py-5 bg-body-tertiary">
+    <div class="container">
+      <div class="row mt-5 justify-content-center">
+        <div class="col">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Информация о пользователе:</h5>
+              <p class="card-text">Фамилия: {{ user.last_name }}</p>
+              <p class="card-text">Имя: {{ user.first_name }}</p>
+              <p class="card-text">Город: {{ user.city }}</p>
+              <p class="card-text">Электронная почта: {{ user.email }}</p>
+              <p class="card-text">Номер телефона: {{ user.phone_number }}</p>
+              <p class="card-text">Пароль: {{ user.password }}</p>
+              <p class="card-text">Инвайт-код: {{ user.invite_code }}</p>
+              <p class="card-text">Чужой инвайт-код: {{ user.vicarious_invite_code }}</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="btn-group">
+                  <a class="btn btn-sm btn-outline-secondary" href="{% url 'interface:user-update' user.pk %}" role="button">Изменить</a>
+
+                <li class="d-flex justify-content-between align-items-center">
+                <form method="post" action="{% url 'interface:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-secondary"> Выйти </button>
+                </form>
+                </li>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<div class="album py-5 bg-body-tertiary">
+    <div class="container">
+      <div class="row mt-5 justify-content-center">
+        <div class="col">
+          <div class="card shadow-sm">
+            <div class="card-body">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Пользователи, которые использовали ваш код:</h5>
+                    <ul>
+                        {% if related_users %}
+                        {% for user in related_users %}
+                            <li>{{ user.phone_number }} - {{user.last_name }} {{ user.first_name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
